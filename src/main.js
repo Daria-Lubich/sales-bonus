@@ -5,7 +5,9 @@
  * @returns {number}
  */
 function calculateSimpleRevenue(purchase, _product) {
+    if (!purchase) return 0;
   const { discount, sale_price, quantity } = purchase;
+  
   const discountCoefficient = 1 - discount / 100;
 
   return sale_price * quantity * discountCoefficient;
@@ -20,6 +22,11 @@ function calculateSimpleRevenue(purchase, _product) {
  * @returns {number}
  */
 function calculateBonusByProfit(index, total, seller) {
+
+    if (!seller || typeof seller.profit !== 'number') {
+    return 0;
+  }
+
   const { profit } = seller; // @TODO: Расчет бонуса от позиции в рейтинге
 
   if (index === 0) {
@@ -45,19 +52,36 @@ function calculateBonusByProfit(index, total, seller) {
  */
 function analyzeSalesData(data, options) {
   // @TODO: Проверка входных данных
-  if (!data || typeof data !== "object") {
-    throw new Error("Объект data обязателен и должен быть объектом");
+  if (!data || typeof data !== 'object') {
+    throw new Error('Объект data обязателен и должен быть объектом');
   }
 
-  if (!options || typeof options !== "object") {
-    throw new Error("Опции (options) должны быть объектом");
+  
+  if (!data.sellers || !Array.isArray(data.sellers)) {
+    throw new Error('В data должна быть коллекция sellers (массив)');
   }
+
+  if (!data.products || !Array.isArray(data.products)) {
+    throw new Error('В data должна быть коллекция products (массив)');
+  }
+
+  if (!data.purchase_records || !Array.isArray(data.purchase_records)) {
+    throw new Error('В data должна быть коллекция purchase_records (массив)');
+  }
+
+  
+  if (!options || typeof options !== 'object') {
+    throw new Error('Опции (options) должны быть объектом');
+  }
+
   const { calculateRevenue, calculateBonus } = options;
 
-  if (!calculateRevenue || !calculateBonus) {
-    throw new Error(
-      "В опциях не хватает обязательных функций: calculateRevenue и/или calculateBonus",
-    );
+  if (!calculateRevenue || typeof calculateRevenue !== 'function') {
+    throw new Error('В options должна быть функция calculateRevenue');
+  }
+
+  if (!calculateBonus || typeof calculateBonus !== 'function') {
+    throw new Error('В options должна быть функция calculateBonus');
   }
 
   // @TODO: Проверка наличия опций
